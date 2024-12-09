@@ -1,0 +1,4 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","14925","Netflix Logiin with test2@gmail.com","","Sun Nov 17 15:24:59 CST 2024","failed","Sun Nov 17 15:25:14 CST 2024","","Login feature in netflixHome app in Android","",""
+"","14443","Netflix Logiin with test1@gmail.com","","Sun Nov 17 15:24:44 CST 2024","failed","Sun Nov 17 15:24:59 CST 2024","","Login feature in netflixHome app in Android","",""
+"","12226","Netflix negative Sceanrio","","Sun Nov 17 15:25:14 CST 2024","failed","Sun Nov 17 15:25:26 CST 2024","","Login feature in netflixHome app in Android","",""

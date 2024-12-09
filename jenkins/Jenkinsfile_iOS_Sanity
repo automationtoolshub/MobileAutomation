@@ -1,0 +1,403 @@
+//import java.math.BigDecimal
+def allNetworkServicesArray = []
+def setWifiServiceString = ''
+def setEthernetServiceString = ''
+def toEmailAddress = 'testn@netflix.com'
+
+pipeline {
+    agent {
+        label 'MacMiniCRSPQA5'
+    }
+    parameters {/Users/karthik.manoharan/Documents/workspace/MobileAutomation/config
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/e2e
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/getLatestApkVersion.sh
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/getLatestIosVersion.sh
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/getProdApkVersion.sh
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/getProdIosVersion.sh
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/jenkins
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/jenkins/Jenkinsfile_Android_Sanity
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/jenkins/Jenkinsfile_iOS_Sanity
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/package-lock.json
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/package.json
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/Readme.md
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/reports
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/tsconfig.json
+/Users/karthik.manoharan/Documents/workspace/MobileAutomation/wdio.conf.ts
+        choice(name: 'deviceType', choices: 'iOS', description: 'Choose deviceType')
+         choice(name: 'buildType', choices: ['UAT','REGRESSION','NIGHTLY'], description: 'choose build type')
+    }
+    options {
+        skipDefaultCheckout(true)
+        //buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '5', numToKeepStr: '30')
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '5', artifactNumToKeepStr: '-1', daysToKeepStr: '5', numToKeepStr: ''))
+    }
+        environment {
+            PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/sbin:$HOME/Library/android/sdk/platform-tools:$HOME/Library/android/sdk/build-tools/34.0.0:$PATH"
+            projName = 'netflixHomeMobileAutomation'
+            repository = 'https://ctlabs.netflix.net/stash/scm/crspqa/netflixhomemobileautomation.git'
+            ANDROID_HOME="$HOME/Library/Android/sdk"
+            LOGIN_CREDENTIALS = credentials('96aaeaa1-63f3-4d87-82dd-2c0ac0cc3ba8') 
+            EMAIL_SUBJECT = "netflixHome(${params.deviceType}) - ${params.buildType} - APP Version(appVersion) - Sanity Testing - jobStatus"
+            NETFLIX_HOME_TEST_DATA_FILE = credentials('1222333-d60d-4463-8d50-11111') 
+        }
+         triggers {
+            cron ('0 9 * * *')
+         }
+        stages {
+            stage('Connect to LAN Network') {
+            steps {
+                script {
+                    echo '==============================Get List of Services==================================================='
+                    allNetworkServicesArray = getAllNetworkServicesArray()
+                    echo "=======Network List: ${allNetworkServicesArray}==========================================================="
+
+                    setWifiServiceString = rearrangeNetworkServices('Wi-Fi', allNetworkServicesArray)
+                    echo "==============Formated Network String for Wifi: ${setWifiServiceString}====================================="
+
+                    setEthernetServiceString = rearrangeNetworkServices('Ethernet', allNetworkServicesArray)
+                    echo "==============Formated Network Network String for Ethernet: ${setEthernetServiceString}======================"
+
+                    echo '========================== Switching to LAN Network ======================================='
+                    sh "networksetup -ordernetworkservices ${setEthernetServiceString}"
+                }
+            }
+            }
+        stage('Checkout SCM') {
+            steps {
+                echo '============================== Check out Soruce file from Git =========================================='
+                checkout scm
+            }
+        }
+            stage('NPM Install') {
+            steps {
+                script {
+                    echo '==============================Set WiFi network for insall npm command ========================================'
+                    //sh "networksetup -ordernetworkservices ${setWifiServiceString}"
+                    echo '============================== NPM Install ======================================================='
+                    // sh 'npm cache clean --force'
+                    // sh 'npm install -f'
+                    //sh 'npm ci'
+                    //sh "cp -r $HOME/sampleDependency/node_modules ${WORKSPACE}"
+                    //allow .apk file will executable
+                    // echo "workspace: ${WORKSPACE}"
+                    // sh "chmod -R +x ${WORKSPACE}/app"
+                
+                }
+            }
+            }
+            stage('Download data.json file from Jenkins'){
+                        steps {
+                            script {
+                                def currentDirectory = pwd()
+                                echo "Current working directory: ${currentDirectory}"
+                                echo '============================== Downloading data.json file from Jenkins =======================================================' 
+                                sh "cp -f ${env.netflix_HOME_TEST_DATA_FILE} ${currentDirectory}/e2e/testData/"
+                            }
+                        }
+            } 
+            stage('netflixHome') {
+                    steps {
+                        script {
+                            echo '========================== Switching to LAN for running application ======================================='
+                            sh "networksetup -ordernetworkservices ${setEthernetServiceString}"
+                            echo '============================Started Running netflixHome UAT Test Cases========================================================'
+                             //echo '============================== Restarting ADB server ========================================'
+                            //   sh 'adb kill-server'
+                            //   sh 'adb start-server'
+                              echo '============================== Executing Test Cases ========================================'
+                              sh "buildType=${params.buildType} deviceType=${params.deviceType} password=${LOGIN_CREDENTIALS_PSW} npx wdio run ./config/wdio.conf_ios_Sanity.ts --cucumberOpts.tags='@sanityIos'"
+                        }
+                    }
+            }
+        }
+     post {
+        always {
+            script {
+                def appVersion = getAppVersion(params.deviceType, params.buildType)
+                echo "appVersion:${appVersion}"
+                def buildResult = currentBuild.currentResult
+                echo "buildResult:${buildResult}"
+                def updatedEmailSubject = env.EMAIL_SUBJECT
+                        .replace("appVersion", "${appVersion}")
+                        .replace("jobStatus", "${buildResult}")
+                echo "Email Subject: ${updatedEmailSubject}"
+                currentBuild.displayName = "${env.BUILD_NUMBER}_${params.buildType}"
+                echo "Build name: ${currentBuild.displayName}"
+                try {
+                    generateAllureReport()
+                    def dataSummaryJsonData = readDataSummaryJson()
+                     echo "dataSummaryJsonData: ${dataSummaryJsonData}" 
+                    def allTestCaseStatus = getAllTestCaseNameStatus(dataSummaryJsonData)
+                    def testCasesCount = getTotalPassedFailedCount(allTestCaseStatus)
+                    echo "all test cases details:${allTestCaseStatus}"
+                    // Update the email subject with the new version number and status using replace
+                    echo "<=====Sending email notification======>" 
+                    sendEmailNotification(appVersion, testCasesCount,updatedEmailSubject,allTestCaseStatus,toEmailAddress)
+                    cleanWs()  // Clean workspace
+                    echo '<==========Successfully Cleaned the workspace===========>'
+                } catch (Exception e) {
+                    def exceptionEmailSubject = env.EMAIL_SUBJECT
+                        .replace("appVersion", "${appVersion}")
+                        .replace("jobStatus", 'Exception')
+                    echo "Exception Email Subject: ${exceptionEmailSubject}"
+                    handleError(e,appVersion,exceptionEmailSubject)
+                }
+            }
+        }
+      }
+}
+
+def getAllNetworkServicesArray() {
+    def networkServices = sh(returnStdout: true, script: 'networksetup -listallnetworkservices')
+    echo "NetworkServices:${networkServices}"
+    // Split the output into lines
+    def lines = networkServices.trim().split('\n')
+    // Remove the first line
+    lines = lines[1..-1]
+    // Initialize an array to store network services
+    // Loop through the remaining lines
+    def networkServiceArray = []
+    for (line in lines) {
+        if (line.contains(' ')) {
+            line = '"' + line + '"' //format the following value from Thunderbolt Bridge to "Thunderbolt Bridge"
+        }
+        // Add the line to the array
+        networkServiceArray.add(line)
+    }
+    echo "networkServicesArraynetworkServicesArray===,${networkServiceArray}"
+    return networkServiceArray
+}
+
+def rearrangeNetworkServices(serviceToMove, serviceArray) {
+    // Create a copy of the array to avoid modifying the original
+    def rearrangedArray = serviceArray.clone()
+    // Find the index of the specified service
+    def index = rearrangedArray.indexOf(serviceToMove)
+    if (index >= 0) {
+        // Remove the specified service from the array
+        rearrangedArray.remove(index)
+        // Insert it at the beginning
+        rearrangedArray = [serviceToMove] + rearrangedArray
+    }
+    // Join the array into a single string with spaces
+    def resultString = rearrangedArray.join(' ')
+    return resultString
+}
+
+def calculatePassPercentage(passed, total) {
+    if (total == 0) {
+        return 0
+    }
+    
+    // Calculate pass percentage
+    def passPercentage = (passed * 100.0 / total) as double
+    
+    // Round to the nearest whole number
+    passPercentage = Math.round(passPercentage)
+    
+    return passPercentage
+}
+
+// def getAllTestCaseNameStatus(Map jsonData) {
+//     def results = []
+//     jsonData.children.each { parent ->
+//         def parentName = parent.name.split(':')[1]?.trim()
+//         // Convert statuses to lowercase
+//         def statuses = parent.children*.status.collect { it.toLowerCase()}
+//         def overallStatus = determineOverallStatus(statuses)
+        
+//         results << [name: parentName, status: overallStatus]
+//     }
+//     return results
+// }
+
+def getAllTestCaseNameStatus(Map jsonData) {
+    def results = [:]
+    jsonData.children.each { parent ->
+        def parentName = parent.name.split(':')[-1]?.trim()
+        // Convert statuses to lowercase
+        def statuses = parent.children*.status.collect { it.toLowerCase()}
+        def overallStatus = determineOverallStatus(statuses)
+        
+        results[parentName] = overallStatus
+    }
+    return results.collect { name, status -> [name: name, status: status] }
+}
+
+def getTotalPassedFailedCount(List results) {
+    def counts = [passed: 0, failed: 0, total: results.size()]
+
+    results.each { result ->
+        if (result.status == 'passed') {
+            counts.passed++
+        } else if (result.status == 'failed') {
+            counts.failed++
+        }
+    }
+    return counts
+}
+
+def determineOverallStatus(List<String> statuses) {
+    if (statuses.any { it.toLowerCase() == "failed" || it.toLowerCase() == "broken" || it.toLowerCase() == "skipped" }) {
+        return "failed"
+    } else {
+        return "passed"
+    }
+}
+
+def getAppVersion(String deviceType,String buildType) {
+    // Make the script executable
+    sh 'chmod +x ./getLatestApkVersion.sh'
+    sh 'chmod +x ./getLatestIosVersion.sh' // Ensure the iOS script is also executable
+
+    // Determine which script to run based on deviceType
+    String scriptToRun
+    if (deviceType.toUpperCase() == 'ANDROID') {
+        scriptToRun = "./getLatestApkVersion.sh"
+    } else if (deviceType.toUpperCase() == 'IOS') {
+        scriptToRun = "./getLatestIosVersion.sh"
+    } else {
+        error "Unsupported device type: ${deviceType}"
+    }
+
+    // Run the selected script and return the trimmed output
+    return sh(script: "${scriptToRun} ${buildType}", returnStdout: true).trim()
+}
+
+def generateAllureReport() {
+    sh './node_modules/.bin/allure generate reports/allure-results --clean -o reports/allure-report'
+    allure([
+        includeProperties: false,
+        jdk: '',
+        properties: [],
+        reportBuildPolicy: 'ALWAYS',
+        results: [[path: 'reports/allure-results']]
+    ])
+}
+
+def readDataSummaryJson() {
+    def dataSuitesJsonfilePath = "${WORKSPACE}/reports/allure-report/data/suites.json"
+    def dataSuitesJsonFileContent = readFile(dataSuitesJsonfilePath)
+    echo "Content of suites.json: ${dataSuitesJsonFileContent}"
+        // Check if content is valid JSON
+    try {
+        return readJSON(text: dataSuitesJsonFileContent)
+    } catch (Exception e) {
+        echo "Error parsing JSON: ${e.message}"
+        return null // Or handle the error as needed
+    }
+}
+
+def sendEmailNotification(String appVersion, Map testCasesCount, String emailSubject, List allTestCaseStatus,String toEmailAddress) {
+    def body = createEmailBody(appVersion, testCasesCount,allTestCaseStatus)  
+    emailext(
+        to: toEmailAddress,
+        subject: emailSubject,
+        body: body,
+        mimeType: 'text/html',
+        from: 'do-not-reply@netflix.com'
+    )
+    echo "<==========Email was sent successfully===================>"
+    cleanWs()
+    echo '<==========Successfully Cleaned the workspace===========>'
+}
+
+def createEmailBody(String appVersion, Map testCasesCount, List allTestCaseStatus ) {
+    def totalCount = testCasesCount.total
+    def passCount = testCasesCount.passed
+    def failCount = testCasesCount.failed
+    def passPercentage = calculatePassPercentage(testCasesCount.passed, totalCount)
+    def failPercentage = 100 - passPercentage
+    
+    def body = """
+    <html>
+        <body>
+            <p><strong><span style="color:blue">Build:</span></strong> <a href="${BUILD_URL}">${BUILD_URL}</a></p>
+            <p><strong><span style="color:blue">Allure Report:</span></strong> <a href="${env.BUILD_URL}allure">${env.BUILD_URL}allure</a></p><br>
+            <table border="1">
+                <tr>
+                    <th>Type</th>
+                    <th>Total</th>
+                    <th>Passed</th>
+                    <th>Failed</th>
+                    <th>Pass%</th>
+                    <th>Fail%</th>
+                </tr>
+                <tr>
+                    <td><strong><span style="color:blue">Sanity Testing</span></strong></td>
+                    <td><strong><span style="color:blue">${totalCount}</span></strong></td>
+                    <td><strong><span style="color:green">${passCount}</span></strong></td>
+                    <td><strong><span style="color:red">${failCount}</span></strong></td>
+                    <td><strong><span style="color:green">${passPercentage}%</span></strong></td>
+                    <td><strong><span style="color:red">${failPercentage}%</span></strong></td>
+                </tr>
+            </table>
+            ${createTestCaseStatusTable(allTestCaseStatus)}
+        </body>
+    </html>
+    """
+    return body
+}
+
+@NonCPS
+def createTestCaseStatusTable(List allTestCaseStatus) {
+    
+    def tableRows = ""
+    int serialNumber = 1
+
+    allTestCaseStatus = allTestCaseStatus.sort { a, b ->
+        // Safe null handling for name property
+        def nameA = a?.name?.toUpperCase() ?: ""
+        def nameB = b?.name?.toUpperCase() ?: ""
+        // Debug output for nameA and nameB comparison
+        echo "Comparing nameA: ${nameA} with nameB: ${nameB}, result: ${nameA <=> nameB}"
+        // Return comparison result
+        nameA <=> nameB
+    }
+
+    allTestCaseStatus.each { item ->
+        def name = item.name.toUpperCase()
+        def status = item.status.toUpperCase()
+        def statusColor = status == 'PASSED' ? 'green' : 'red'
+        tableRows += """
+            <tr>
+                <td style="text-align: center;"><strong><span style="color:black">${serialNumber}</span></strong></td>
+                <td style="text-align: left;"><strong><span style="color:green">${name}</span></strong></td>
+                <td style="text-align: left;"><strong><span style="color:${statusColor}">${status}</span></strong></td>
+            </tr>
+        """
+        serialNumber++
+    }
+    
+    return """
+        <br><table border="1">
+            <tr>
+                <th>S.No</th>
+                <th>TestCase Name</th>
+                <th>Status</th>
+            </tr>
+            ${tableRows}
+        </table>
+    """
+}
+
+def handleError(Exception e, String appVersion, String emailSubject) {
+    echo "<==========pipeline is failing===================>"
+    echo "An error occurred during post-processing: ${e.message}"
+    def errorMessage = """
+    An error occurred during pipeline execution:  
+    ${e.message}     
+    Build URL: ${BUILD_URL}
+    """ 
+    emailext(
+        to: 'test@netflix.com',
+        subject: emailSubject,
+        body: errorMessage,
+        mimeType: 'text/html',
+        from: 'do-not-reply@netflix.com'
+    )
+    cleanWs()
+    echo '<==========Successfully Cleaned the workspace===========>'
+    throw e  // Re-throw the exception to mark the build as failed
+}
+

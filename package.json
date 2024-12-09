@@ -1,0 +1,46 @@
+{
+  "name": "netflixHome",
+  "version": "1.0.0",
+  "description": "netflixHomeMobileAutomation",
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/unzipper": "^0.10.10",
+    "@types/xml2js": "^0.4.14",
+    "@typescript-eslint/eslint-plugin": "^8.14.0",
+    "@typescript-eslint/parser": "^8.14.0",
+    "@wdio/allure-reporter": "^9.2.14",
+    "@wdio/appium-service": "^9.2.14",
+    "@wdio/cli": "^9.2.14",
+    "@wdio/cucumber-framework": "^9.2.14",
+    "@wdio/local-runner": "^9.2.15",
+    "@wdio/spec-reporter": "^9.2.14",
+    "allure-commandline": "^2.32.0",
+    "appium": "^2.12.1",
+    "eslint": "^9.15.0",
+    "globals": "^15.12.0",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "preandroid": "rm -rf reports && rm -rf allure-results && rm -rf logs",
+    "preandroidRetry": "rm -rf reports && rm -rf allure-results && rm -rf logs",
+    "preios": "rm -rf reports && rm -rf allure-results && rm -rf logs  && rm -rf output",
+    "android": "wdio run ./config/wdio.conf_android_local.ts --cucumberOpts.tags='@android'",
+    "androidRetry": "wdio run ./config/wdio.conf_android_local.ts --cucumberOpts.tags='@androidRetry'",
+    "ios": "wdio run ./config/wdio.conf_ios_local.ts --cucumberOpts.tags='@test'",
+    "postandroid": "npx allure generate reports/allure-results --clean -o reports/allure-report && npx allure open reports/allure-report",
+    "postandroidRetry": "npx allure generate reports/allure-results --clean -o reports/allure-report && npx allure open reports/allure-report",
+    "postios": "npx allure generate reports/allure-results --clean -o reports/allure-report && npx allure open reports/allure-report",
+    "allure": "npx allure generate reports/allure-results --clean -o reports/allure-report && npx allure open reports/allure-report",
+    "clean": "npm cache clean --force",
+    "lint": "node_modules/.bin/eslint . --ext .ts"
+  },
+  "dependencies": {
+    "appium-uiautomator2-driver": "^3.8.3",
+    "axios": "^1.7.7",
+    "fs-extra": "^11.2.0",
+    "https": "^1.0.0",
+    "path": "^0.12.7"
+  }
+}

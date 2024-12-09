@@ -1,0 +1,192 @@
+{
+    "uuid": "57e541ff-06a9-4158-8bea-a1ed5a833844",
+    "historyId": "b3551690eff4d9f889dd82deb72dc134",
+    "status": "failed",
+    "statusDetails": {
+        "message": "Error: expect(received).toEqual(expected) // deep equality",
+        "trace": "Error: expect(received).toEqual(expected) // deep equality\n\nExpected: false\nReceived: true\n    at LoginAndroid.negativeScenario (/Users/karthik.manoharan/Documents/workspace/MobileAutomation/e2e/pages/android/LoginAndroid.ts:68:18)\n    at World.<anonymous> (/Users/karthik.manoharan/Documents/workspace/MobileAutomation/e2e/stepDefinitions/android/LoginAndroidStepDefinitions.ts:31:21)"
+    },
+    "stage": "finished",
+    "steps": [
+        {
+            "status": "passed",
+            "statusDetails": {},
+            "stage": "finished",
+            "steps": [],
+            "attachments": [],
+            "parameters": [],
+            "start": 1731878699291,
+            "name": "Given Load the Application for android",
+            "stop": 1731878699292
+        },
+        {
+            "status": "passed",
+            "statusDetails": {},
+            "stage": "finished",
+            "steps": [
+                {
+                    "status": "passed",
+                    "statusDetails": {},
+                    "stage": "finished",
+                    "steps": [],
+                    "attachments": [],
+                    "parameters": [],
+                    "start": 1731878704805,
+                    "name": "Cliked Sign in Button",
+                    "stop": 1731878704805
+                }
+            ],
+            "attachments": [],
+            "parameters": [],
+            "start": 1731878699293,
+            "name": "Then Click Sign in Option for android",
+            "stop": 1731878704806
+        },
+        {
+            "status": "passed",
+            "statusDetails": {},
+            "stage": "finished",
+            "steps": [
+                {
+                    "status": "passed",
+                    "statusDetails": {},
+                    "stage": "finished",
+                    "steps": [],
+                    "attachments": [],
+                    "parameters": [],
+                    "start": 1731878706280,
+                    "name": "Entered Email Address",
+                    "stop": 1731878706280
+                }
+            ],
+            "attachments": [],
+            "parameters": [],
+            "start": 1731878704806,
+            "name": "Then Enter \"test2@gmail.com\" in the email or phonumber text box for android",
+            "stop": 1731878706282
+        },
+        {
+            "status": "failed",
+            "statusDetails": {
+                "message": "Error: expect(received).toEqual(expected) // deep equality",
+                "trace": "Error: expect(received).toEqual(expected) // deep equality\n\nExpected: false\nReceived: true\n    at LoginAndroid.negativeScenario (/Users/karthik.manoharan/Documents/workspace/MobileAutomation/e2e/pages/android/LoginAndroid.ts:68:18)\n    at World.<anonymous> (/Users/karthik.manoharan/Documents/workspace/MobileAutomation/e2e/stepDefinitions/android/LoginAndroidStepDefinitions.ts:31:21)"
+            },
+            "stage": "finished",
+            "steps": [],
+            "attachments": [],
+            "parameters": [],
+            "start": 1731878706282,
+            "name": "Then Negative Condition for android",
+            "stop": 1731878706285
+        },
+        {
+            "status": "passed",
+            "statusDetails": {},
+            "stage": "finished",
+            "steps": [],
+            "attachments": [],
+            "parameters": [],
+            "start": 1731878706618,
+            "name": "Given Load the Application for android",
+            "stop": 1731878706619
+        },
+        {
+            "status": "passed",
+            "statusDetails": {},
+            "stage": "finished",
+            "steps": [
+                {
+                    "status": "passed",
+                    "statusDetails": {},
+                    "stage": "finished",
+                    "steps": [],
+                    "attachments": [],
+                    "parameters": [],
+                    "start": 1731878712255,
+                    "name": "Cliked Sign in Button",
+                    "stop": 1731878712255
+                }
+            ],
+            "attachments": [],
+            "parameters": [],
+            "start": 1731878706619,
+            "name": "Then Click Sign in Option for android",
+            "stop": 1731878712256
+        },
+        {
+            "status": "passed",
+            "statusDetails": {},
+            "stage": "finished",
+            "steps": [
+                {
+                    "status": "passed",
+                    "statusDetails": {},
+                    "stage": "finished",
+                    "steps": [],
+                    "attachments": [],
+                    "parameters": [],
+                    "start": 1731878713779,
+                    "name": "Entered Email Address",
+                    "stop": 1731878713779
+                }
+            ],
+            "attachments": [],
+            "parameters": [],
+            "start": 1731878712257,
+            "name": "Then Enter \"test2@gmail.com\" in the email or phonumber text box for android",
+            "stop": 1731878713780
+        },
+        {
+            "status": "failed",
+            "statusDetails": {
+                "message": "Error: expect(received).toEqual(expected) // deep equality",
+                "trace": "Error: expect(received).toEqual(expected) // deep equality\n\nExpected: false\nReceived: true\n    at LoginAndroid.negativeScenario (/Users/karthik.manoharan/Documents/workspace/MobileAutomation/e2e/pages/android/LoginAndroid.ts:68:18)\n    at World.<anonymous> (/Users/karthik.manoharan/Documents/workspace/MobileAutomation/e2e/stepDefinitions/android/LoginAndroidStepDefinitions.ts:31:21)"
+            },
+            "stage": "finished",
+            "steps": [],
+            "attachments": [],
+            "parameters": [],
+            "start": 1731878713780,
+            "name": "Then Negative Condition for android",
+            "stop": 1731878713783
+        }
+    ],
+    "attachments": [],
+    "parameters": [
+        {
+            "name": "device",
+            "value": "Pixel 6"
+        }
+    ],
+    "labels": [
+        {
+            "name": "language",
+            "value": "javascript"
+        },
+        {
+            "name": "framework",
+            "value": "wdio"
+        },
+        {
+            "name": "package",
+            "value": ".Users.karthik.manoharan.Documents.workspace.MobileAutomation.e2e.features.android.AndroidLogin.feature"
+        },
+        {
+            "name": "thread",
+            "value": "0-0"
+        },
+        {
+            "name": "suite",
+            "value": "Login feature in netflixHome app in Android"
+        },
+        {
+            "name": "feature",
+            "value": "Login feature in netflixHome app in Android"
+        }
+    ],
+    "links": [],
+    "start": 1731878699112,
+    "name": "Netflix Logiin with test2@gmail.com",
+    "testCaseId": "b3551690eff4d9f889dd82deb72dc134",
+    "stop": 1731878714037
+}
